@@ -102,7 +102,8 @@ export interface BackgroundProcessorOptions {
 export abstract class BackgroundProcessor extends Processor {
   private static _model: BodyPix | null = null;
   private static async _loadModel(config: ModelConfig = MODEL_CONFIG): Promise<void> {
-    BackgroundProcessor._model = await loadModel(config)
+    const combinedConfig = Object.assign({}, MODEL_CONFIG, config);
+    BackgroundProcessor._model = await loadModel(combinedConfig)
       .catch((error: any) => console.error('Unable to load model.', error)) || null;
   }
   protected _outputCanvas: HTMLCanvasElement;
@@ -187,9 +188,9 @@ export abstract class BackgroundProcessor extends Processor {
    * Call this method before attaching the processor to ensure
    * video frames are processed correctly.
    */
-   async loadModel() {
+   async loadModel(config?: any) {
     const [, tflite, modelResponse ] = await Promise.all([
-      BackgroundProcessor._loadModel(),
+      BackgroundProcessor._loadModel(config),
       this._loadTwilioTfLite(),
       fetch(this._assetsPath + MODEL_NAME),
     ]);
